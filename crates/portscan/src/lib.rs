@@ -677,10 +677,8 @@ async fn probe_port(
         {
             let b = banner_for_cve.clone();
             let s = svc.clone();
-            if let Ok(nvd_findings) = tokio::task::spawn_blocking(move || {
-                cve::nvd::try_search(&b, &s)
-            })
-            .await
+            if let Ok(nvd_findings) =
+                tokio::task::spawn_blocking(move || cve::nvd::try_search(&b, &s)).await
             {
                 findings.extend(nvd_findings);
             }

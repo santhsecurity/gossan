@@ -359,7 +359,6 @@ pub enum Command {
         #[arg(long, help = "Checkpoint file path")]
         checkpoint: Option<String>,
     },
-
 }
 
 impl Cli {

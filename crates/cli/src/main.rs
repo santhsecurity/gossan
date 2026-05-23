@@ -221,7 +221,6 @@ async fn main() -> anyhow::Result<()> {
                 println!("{}\t{}\t{}", id, seed, ts);
             }
         }
-
     }
 
     Ok(())

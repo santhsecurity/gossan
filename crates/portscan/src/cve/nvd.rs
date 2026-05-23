@@ -153,9 +153,8 @@ pub fn try_search(banner: &str, svc: &ServiceTarget) -> Vec<Finding> {
 fn default_db_path() -> PathBuf {
     let mut path = if let Ok(xdg) = std::env::var("XDG_CACHE_HOME") {
         PathBuf::from(xdg)
-    } else if let Some(home) = dirs_next().or_else(|| {
-        std::env::var("HOME").ok().map(PathBuf::from)
-    }) {
+    } else if let Some(home) = dirs_next().or_else(|| std::env::var("HOME").ok().map(PathBuf::from))
+    {
         home.join(".cache")
     } else {
         std::env::temp_dir()
@@ -173,9 +172,7 @@ fn search_description(
     conn: &rusqlite::Connection,
     text: &str,
 ) -> Result<Vec<String>, rusqlite::Error> {
-    let mut stmt = conn.prepare(
-        "SELECT id FROM cve WHERE description LIKE '%' || ?1 || '%'",
-    )?;
+    let mut stmt = conn.prepare("SELECT id FROM cve WHERE description LIKE '%' || ?1 || '%'")?;
     let ids = stmt
         .query_map(rusqlite::params![text], |row| row.get(0))?
         .filter_map(|r| r.ok())
@@ -199,7 +196,10 @@ fn extract_search_terms(banner: &str) -> Vec<String> {
     if lower.contains("openssh") {
         push("openssh".into());
         if let Some(v) = lower.split("openssh_").nth(1) {
-            let v = v.split(|c: char| !c.is_alphanumeric() && c != '.').next().unwrap_or("");
+            let v = v
+                .split(|c: char| !c.is_alphanumeric() && c != '.')
+                .next()
+                .unwrap_or("");
             if !v.is_empty() {
                 push(format!("openssh {v}"));
                 let dotted = v
@@ -337,9 +337,7 @@ fn extract_search_terms(banner: &str) -> Vec<String> {
 fn clean_banner(banner: &str) -> String {
     banner
         .chars()
-        .filter(|c| {
-            c.is_alphanumeric() || c.is_whitespace() || *c == '/' || *c == '.' || *c == '-'
-        })
+        .filter(|c| c.is_alphanumeric() || c.is_whitespace() || *c == '/' || *c == '.' || *c == '-')
         .take(100)
         .collect::<String>()
         .trim()
@@ -398,8 +396,7 @@ mod tests {
 
     #[test]
     fn test_extract_apache_keywords() {
-        let terms =
-            extract_search_terms("HTTP/1.1 200 OK\r\nServer: Apache/2.4.49");
+        let terms = extract_search_terms("HTTP/1.1 200 OK\r\nServer: Apache/2.4.49");
         assert!(terms.iter().any(|t| t.contains("apache http server")));
     }
 
@@ -427,16 +424,12 @@ mod tests {
             guess_severity("Cross-site Scripting vulnerability"),
             Severity::High
         );
-        assert_eq!(
-            guess_severity("Denial of Service"),
-            Severity::High
-        );
+        assert_eq!(guess_severity("Denial of Service"), Severity::High);
     }
 
     #[test]
     fn test_server_header_extraction() {
-        let terms =
-            extract_search_terms("HTTP/1.1 200 OK\r\nServer: CouchDB/3.2.1\r\n");
+        let terms = extract_search_terms("HTTP/1.1 200 OK\r\nServer: CouchDB/3.2.1\r\n");
         assert!(terms.iter().any(|t| t.contains("couchdb")));
     }
 }
